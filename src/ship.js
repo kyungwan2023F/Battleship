@@ -10,7 +10,7 @@ export class Ship {
   }
 
   isSunk() {
-    sunken = this.hits >= this.length;
-    return sunken;
+    this.sunken = this.hits >= this.length;
+    return this.sunken;
   }
 }

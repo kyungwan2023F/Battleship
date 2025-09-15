@@ -1,8 +1,12 @@
+import { Ship } from "./ship.js";
+
 export class GameBoard {
   constructor() {
     this.board = [];
     this.setUpBoard();
     this.numShips = 0;
+    this.missedAttacks = [];
+    this.sunkenShips = [];
   }
 
   setUpBoard() {
@@ -14,31 +18,82 @@ export class GameBoard {
     }
   }
 
-  placeShip(startRow, startCol, direction, ship) {
+  placeShipPreview(startRow, startCol, direction, ship) {
     for (let i = 0; i < ship.length; i++) {
       if (direction === "horizontal") {
-        if (board[startRow][startCol + i].getHasShip()) {
+        if (this.board[startRow][startCol + i].getHasShip()) {
           return "Already a ship there!";
         }
       } else {
-        if (board[startRow + i][startCol].getHasShip()) {
+        if (this.board[startRow + i][startCol].getHasShip()) {
           return "Already a ship there!";
         }
       }
     }
+    return "Placeable";
+  }
+
+  placeShip(startRow, startCol, direction, ship) {
+    if (this.hasEnoughShips()) return "Enough Ships";
+    const previewResult = this.placeShipPreview(
+      startRow,
+      startCol,
+      direction,
+      ship,
+    );
+    if (previewResult !== "Placeable") {
+      return "Already a ship there!";
+    }
     for (let i = 0; i < ship.length; i++) {
       if (direction === "horizontal") {
-        board[startRow][startCol + i].placeShip(ship);
+        this.board[startRow][startCol + i].placeShip(ship);
       } else {
-        board[startRow + i][startCol].placeShip(ship);
+        this.board[startRow + i][startCol].placeShip(ship);
       }
     }
     this.numShips++;
-    if (this.hasEnoughShips()) return "Enough Ships";
+    return {
+      row: startRow,
+      column: startCol,
+      dir: direction,
+      len: ship.length,
+    };
+  }
+
+  receiveAttack(startRow, startCol) {
+    if (this.board[startRow][startCol].getHasShip()) {
+      if (!this.board[startRow][startCol].getWasHit()) {
+        this.board[startRow][startCol].markHit();
+        if (this.board[startRow][startCol].getShip().isSunk()) {
+          this.sunkenShips.push(this.board[startRow][startCol].getShip());
+        }
+      } else {
+        return "Already Hit. Pick Another Coordinate.";
+      }
+    } else {
+      this.missedAttacks.push({ row: startRow, column: startCol });
+      if (!this.board[startRow][startCol].getWasHit()) {
+        this.board[startRow][startCol].markHit();
+      } else {
+        return "Already Hit. Pick Another Coordinate.";
+      }
+    }
   }
 
   hasEnoughShips() {
-    return numShips >= 5;
+    return this.numShips >= 5;
+  }
+
+  getMissedAttacks() {
+    this.missedAttacks.forEach((attack) => {
+      console.log("Row: ", attack.row);
+      console.log("Column: ", attack.column);
+    });
+    return this.missedAttacks;
+  }
+
+  isAllShipSunk() {
+    return this.sunkenShips.length >= 5;
   }
 }
 
@@ -59,11 +114,13 @@ function Cell() {
 
   const getShip = () => ship;
   const getHasShip = () => hasShip;
+  const getWasHit = () => wasHit;
 
   return {
     markHit,
     placeShip,
     getShip,
     getHasShip,
+    getWasHit,
   };
 }

@@ -1,0 +1,100 @@
+.boards {
+  display: flex;
+  position: relative;
+  min-height: 600px;
+  border: 2px solid red;
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.player-ship-board {
+  padding: 1rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-template-rows: repeat(10, 40px);
+}
+
+.player-attack-board {
+  padding: 1rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-template-rows: repeat(10, 40px);
+}
+
+.cells-layer {
+  display: contents;
+  position: absolute;
+  inset: 0;
+}
+
+.cell {
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  background-color: white;
+  transition: background 0.2s;
+}
+
+.cell:hover {
+  background-color: #ffcccc;
+}
+
+.cell.attacked {
+  background-color: #ffcccc !important;
+  border-color: #ff6666;
+  cursor: not-allowed;
+}
+
+.ships-layer {
+  padding: 1rem;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: inherit;
+  grid-template-rows: inherit;
+  pointer-events: none;
+}
+
+.ship {
+  background-color: black;
+}
+
+.highlight {
+  background: rgba(255, 0, 0, 0.25);
+  outline: 2px solid red;
+  z-index: 1;
+}
+
+.shipArtifact {
+  z-index: 1000;
+  cursor: grab;
+}
+
+.shipArtifact.dragging {
+  cursor: grabbing;
+  z-index: 1001;
+}
+
+.ship-container {
+  position: fixed;
+  right: 700px;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #333;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+}
+
+.ship-container::before {
+  content: "Ships";
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
