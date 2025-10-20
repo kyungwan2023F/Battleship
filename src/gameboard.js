@@ -60,6 +60,53 @@ export class GameBoard {
     };
   }
 
+  randomShipPlacement() {
+    const shipLengths = [5, 4, 3, 2, 2];
+    const placements = [];
+
+    for (const length of shipLengths) {
+      let placed = false;
+      let attempts = 0;
+      const maxAttempts = 100; // Prevent infinite loop
+
+      while (!placed && attempts < maxAttempts) {
+        attempts++;
+
+        // Random position and direction
+        const row = Math.floor(Math.random() * 10);
+        const col = Math.floor(Math.random() * 10);
+        const direction = Math.random() < 0.5 ? "horizontal" : "vertical";
+
+        // Check if ship fits on board
+        if (direction === "horizontal") {
+          if (col + length > 10) continue; // Out of bounds
+        } else {
+          if (row + length > 10) continue; // Out of bounds
+        }
+
+        // Try to place the ship
+        const ship = new Ship(length);
+        const result = this.placeShip(row, col, direction, ship);
+
+        // Check if placement was successful
+        if (result !== "Already a ship there!" && result !== "Enough Ships") {
+          placed = true;
+          placements.push(result);
+          console.log(
+            `Placed ship of length ${length} at (${row}, ${col}) ${direction}`,
+          );
+        }
+      }
+
+      if (!placed) {
+        console.error(
+          `Failed to place ship of length ${length} after ${maxAttempts} attempts`,
+        );
+      }
+    }
+    return placements;
+  }
+
   receiveAttack(startRow, startCol) {
     if (this.board[startRow][startCol].getHasShip()) {
       if (!this.board[startRow][startCol].getWasHit()) {

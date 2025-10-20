@@ -17,6 +17,38 @@ const GRID_ROWS = 10;
 let two_ship, three_ship, four_ship, five_ship;
 let currentPlayer, currentPlayerShipBoard, currentPlayArea;
 
+// Counter object for ship count
+let shipCounts = {
+  2: { placed: 0, max: 2 },
+  3: { placed: 0, max: 1 },
+  4: { placed: 0, max: 1 },
+  5: { placed: 0, max: 1 },
+};
+
+export function resetShipDraggingState() {
+  // Reset selection state
+  isSelected = false;
+  startX = undefined;
+  startY = undefined;
+  initialLeft = undefined;
+  initialTop = undefined;
+  shipLengthSelected = 0;
+  shipOrientation = "horizontal";
+
+  // Reset ship counts
+  for (let key in shipCounts) {
+    shipCounts[key].placed = 0;
+  }
+
+  // Reset current player references
+  currentPlayer = null;
+  currentPlayerShipBoard = null;
+  currentPlayArea = null;
+
+  // Clear any remaining previews
+  clearSnapPreview();
+}
+
 export function renderPlayerArea(shipBoard, attackBoard, container) {
   const playerArea = document.createElement("div");
   playerArea.className = "player-area";
@@ -72,6 +104,8 @@ export function placeShipOnBoard(container, result) {
   shipsLayer.appendChild(el);
 }
 
+export function displayBoard(shipBoard, container) {}
+
 export function receiveAttackOnBoard(row, column, shipBoardContainer) {
   const gc = (n) => n + 1;
   let el = document.createElement("div");
@@ -102,6 +136,10 @@ function createShip(shipLength) {
   }
 
   ship.addEventListener("click", (e) => {
+    if (shipCounts[shipLength].placed >= shipCounts[shipLength].max) {
+      console.log(`Ship of length ${shipLength} already placed`);
+      return;
+    }
     e.preventDefault();
     shipLengthSelected = shipLength;
     isSelected = true;
@@ -253,8 +291,17 @@ function getShipElement(length) {
   }
 }
 
+// Store the handler function so we can remove it later
+let rightClickHandler = null;
+
 export function attachRightClickRotation() {
-  document.addEventListener("contextmenu", (e) => {
+  // Remove previous listener if it exists
+  if (rightClickHandler) {
+    document.removeEventListener("contextmenu", rightClickHandler);
+  }
+
+  // Create new handler
+  rightClickHandler = (e) => {
     if (isSelected) {
       e.preventDefault();
 
@@ -269,7 +316,10 @@ export function attachRightClickRotation() {
 
       clearSnapPreview();
     }
-  });
+  };
+
+  // Add the new listener
+  document.addEventListener("contextmenu", rightClickHandler);
 }
 
 // Initialize dragging functionality - called from index.js
@@ -353,6 +403,18 @@ export function initializeShipDragging(
       }
 
       placeShipOnBoard(playerShipBoard, result);
+      shipCounts[shipLengthSelected].placed++;
+
+      const shipElement = getShipElement(shipLengthSelected);
+      if (
+        shipCounts[shipLengthSelected].placed >=
+        shipCounts[shipLengthSelected].max
+      ) {
+        shipElement.style.opacity = "0.5";
+        shipElement.style.cursor = "not-allowed";
+        shipElement.style.pointerEvents = "none";
+      }
+
       isSelected = false;
       clearSnapPreview();
       console.log("placing ship at coordinate ", snap.row, snap.col);

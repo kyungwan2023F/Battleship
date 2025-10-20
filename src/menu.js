@@ -1,4 +1,8 @@
-import { initializeGame } from "./gameController.js";
+import {
+  initializeGame,
+  initializeSinglePlayerGame,
+  displayMainMenu,
+} from "./gameController.js";
 import "./styles/menu.css";
 
 export function showMainMenu() {
@@ -14,12 +18,39 @@ export function showMainMenu() {
   app.appendChild(menu);
 
   document.getElementById("play-btn").addEventListener("click", () => {
-    console.log("Play button clicked!");
     menu.classList.add("hidden");
+    showGameModeSelection();
+  });
+}
+
+function showGameModeSelection() {
+  const app = document.querySelector(".app");
+  app.innerHTML = "";
+  const playerOptionMenu = document.createElement("div");
+  const singlePlayerOption = document.createElement("button");
+  const multiPlayerOption = document.createElement("button");
+  playerOptionMenu.id = "player-option-menu";
+  singlePlayerOption.id = "single-player-button";
+  singlePlayerOption.textContent = "Single Player";
+
+  multiPlayerOption.id = "multi-player-button";
+  multiPlayerOption.textContent = "Multi Player";
+
+  playerOptionMenu.appendChild(singlePlayerOption);
+  playerOptionMenu.appendChild(multiPlayerOption);
+  app.appendChild(playerOptionMenu);
+
+  singlePlayerOption.addEventListener("click", () => {
+    app.innerHTML = "";
+    startGame();
+  });
+
+  multiPlayerOption.addEventListener("click", () => {
+    app.innerHTML = "";
     startGame();
   });
 }
 
 function startGame() {
-  initializeGame();
+  initializeSinglePlayerGame();
 }
