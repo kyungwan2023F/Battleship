@@ -54,13 +54,30 @@ export function renderPlayerArea(shipBoard, attackBoard, container) {
   playerArea.className = "player-area";
   container.appendChild(playerArea);
 
+  const shipBoardWrapper = document.createElement("div");
+  shipBoardWrapper.className = "board-wrapper";
+
   const playerShipBoard = document.createElement("div");
+  const shipBoardTitle = document.createElement("h3");
+  shipBoardTitle.textContent = "Your Fleet";
+  shipBoardTitle.className = "board-title";
+
   playerShipBoard.className = "player-ship-board";
+
+  shipBoardWrapper.append(shipBoardTitle, playerShipBoard);
+
+  const attackBoardWrapper = document.createElement("div");
+  attackBoardWrapper.className = "board-wrapper";
 
   const playerAttackBoard = document.createElement("div");
   playerAttackBoard.className = "player-attack-board";
+  const attackBoardTitle = document.createElement("h3");
+  attackBoardTitle.textContent = "Enemy Waters";
+  attackBoardTitle.className = "board-title";
 
-  playerArea.append(playerShipBoard, playerAttackBoard);
+  attackBoardWrapper.append(attackBoardTitle, playerAttackBoard);
+
+  playerArea.append(shipBoardWrapper, attackBoardWrapper);
 
   renderPlayerBoard(shipBoard, playerShipBoard);
   renderPlayerBoard(attackBoard, playerAttackBoard);

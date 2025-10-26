@@ -52,7 +52,7 @@ function showGameModeSelection() {
 
   multiPlayerOption.addEventListener("click", () => {
     app.innerHTML = "";
-    initializeSinglePlayerGame();
+    initializeMultiPlayerGame();
   });
 }
 
@@ -76,12 +76,6 @@ export function initializeSinglePlayerGame() {
     playArea,
   );
 
-  renderPlayerArea(
-    player2.shipBoard.board,
-    player2.attackBoard.board,
-    playArea,
-  );
-
   // Create the ship container for dragging
   createShipContainer();
 
@@ -98,11 +92,6 @@ export function initializeSinglePlayerGame() {
       }
       const computerPlacements = player2.randomlyPlaceShips();
 
-      computerPlacements.forEach((placement) => {
-        const shipBoards = document.querySelectorAll(".player-ship-board");
-        const player2ShipBoard = shipBoards[1];
-        placeShipOnBoard(player2ShipBoard, placement);
-      });
       startBattlePhase(player1, player2);
       showPhaseMessage("Battle Phase - Click enemy board to attack!", 3000);
     }
@@ -123,7 +112,7 @@ export function initializeSinglePlayerGame() {
   attachRightClickRotation();
 }
 
-export function initializeGame() {
+export function initializeMultiPlayerGame() {
   // Create and export players
   const player1 = new Player("player");
   const player2 = new Player("player");
@@ -160,7 +149,7 @@ export function initializeGame() {
     if (allShipsPlaced) {
       // Check if both players are done
       if (checkAllShipsPlaced(player1)) {
-        startBattlePhase();
+        startMultiBattlePhase();
       }
     }
   }
@@ -173,6 +162,11 @@ export function initializeGame() {
   // Pass the required objects to initialize dragging
   initializeShipDragging(player1ShipBoard, playArea, player1, handleShipPlaced);
   initializeShipDragging(player2ShipBoard, playArea, player2, handleShipPlaced);
+
+  showPhaseMessage(
+    "Ship Placement Phase - Player 1 will place their ships on the left board. Player 2 will place their ships on the right board. Press right click to rotate and ESC to cancel.",
+    3000,
+  );
 
   attachRightClickRotation();
 }
@@ -200,12 +194,41 @@ export function startBattlePhase(player1, player2) {
       const result = player2.shipBoard.receiveAttack(row, col);
 
       if (result !== "Already Hit. Pick Another Coordinate.") {
+        // Check if it was a hit or miss
+        if (result && result.attackRow !== undefined) {
+          // It's a hit
+          event.target.classList.add("hit");
+        } else {
+          // It's a miss
+          event.target.classList.add("miss");
+        }
+
         event.target.classList.add("attacked");
         console.log("Sunken ships:", player2.shipBoard.sunkenShips);
 
         if (player2.shipBoard.isAllShipSunk()) {
           showPhaseMessage("You Won!", 3000);
+          return;
         }
+
+        if (player1.attackBoard.isAllCellsAttacked()) {
+          if (
+            player1.shipBoard.sunkenShips.length >
+            player2.shipBoard.sunkenShips.length
+          ) {
+            showPhaseMessage("You Won!", 3000);
+          } else if (
+            player1.shipBoard.sunkenShips.length <
+            player2.shipBoard.sunkenShips.length
+          ) {
+            showPhaseMessage("You Lost!", 3000);
+          } else {
+            showPhaseMessage("Draw - All cells attacked!", 3000);
+          }
+          return;
+        }
+
+        // Computer's turn
         const attackResult = player2.randomShipAttack(player1.shipBoard);
         const playerShipBoard = document.querySelector(".player-ship-board");
         const attackedCell = playerShipBoard.querySelector(
@@ -214,12 +237,168 @@ export function startBattlePhase(player1, player2) {
 
         if (attackedCell) {
           attackedCell.classList.add("attacked");
+          // Check if computer hit or missed
+          if (
+            player1.shipBoard.board[attackResult.row][
+              attackResult.col
+            ].getHasShip()
+          ) {
+            attackedCell.classList.add("hit");
+          } else {
+            attackedCell.classList.add("miss");
+          }
         }
+
         if (player1.shipBoard.isAllShipSunk()) {
           showPhaseMessage("You Lost!", 3000);
+          return;
         }
       }
     });
+  });
+}
+
+export function startMultiBattlePhase(player1, player2) {
+  let currentTurn = 1; // 1 for player1, 2 for player2
+
+  // Get DOM elements after they're created
+  const playerAreas = document.querySelectorAll(".player-area");
+  const player1Area = playerAreas[0];
+  const player2Area = playerAreas[1];
+
+  const player1AttackCells = player1Area.querySelectorAll(
+    ".player-attack-board .cells-layer .cell",
+  );
+
+  const player2AttackCells = player2Area.querySelectorAll(
+    ".player-attack-board .cells-layer .cell",
+  );
+
+  // Show initial turn message
+  showPhaseMessage("Player 1's Turn", 2000);
+
+  // Disable player 2's board initially
+  disableBoard(player2AttackCells);
+
+  // Player 1 attack event listeners
+  player1AttackCells.forEach((cell) => {
+    cell.addEventListener("click", (event) => {
+      if (currentTurn !== 1) return;
+
+      const row = parseInt(event.target.dataset.row);
+      const col = parseInt(event.target.dataset.col);
+      const result = player2.shipBoard.receiveAttack(row, col);
+
+      if (result !== "Already Hit. Pick Another Coordinate.") {
+        // Check if it was a hit or miss
+        if (result && result.hit) {
+          event.target.classList.add("hit");
+        } else {
+          event.target.classList.add("miss");
+        }
+
+        event.target.classList.add("attacked");
+
+        // Check if player 1 won
+        if (player2.shipBoard.isAllShipSunk()) {
+          showPhaseMessage("Player 1 Wins!", 3000);
+          return;
+        }
+
+        // Check for stalemate
+        if (player2.shipBoard.isAllCellsAttacked()) {
+          if (
+            player1.shipBoard.sunkenShips.length <
+            player2.shipBoard.sunkenShips.length
+          ) {
+            showPhaseMessage("Player 1 Wins!", 3000);
+          } else if (
+            player1.shipBoard.sunkenShips.length >
+            player2.shipBoard.sunkenShips.length
+          ) {
+            showPhaseMessage("Player 2 Wins!", 3000);
+          } else {
+            showPhaseMessage("Draw - It's a Tie!", 3000);
+          }
+          return;
+        }
+
+        // Switch turn to player 2
+        currentTurn = 2;
+        showPhaseMessage("Player 2's Turn", 2000);
+        disableBoard(player1AttackCells);
+        enableBoard(player2AttackCells);
+      }
+    });
+  });
+
+  // Player 2 attack event listeners
+  player2AttackCells.forEach((cell) => {
+    cell.addEventListener("click", (event) => {
+      if (currentTurn !== 2) return; // Not player 2's turn
+
+      const row = parseInt(event.target.dataset.row);
+      const col = parseInt(event.target.dataset.col);
+      const result = player1.shipBoard.receiveAttack(row, col);
+
+      if (result !== "Already Hit. Pick Another Coordinate.") {
+        // Check if it was a hit or miss
+        if (result && result.hit) {
+          event.target.classList.add("hit");
+        } else {
+          event.target.classList.add("miss");
+        }
+
+        event.target.classList.add("attacked");
+
+        // Check if player 2 won
+        if (player1.shipBoard.isAllShipSunk()) {
+          showPhaseMessage("Player 2 Wins!", 3000);
+          return;
+        }
+
+        // Check for stalemate
+        if (player1.shipBoard.isAllCellsAttacked()) {
+          if (
+            player1.shipBoard.sunkenShips.length <
+            player2.shipBoard.sunkenShips.length
+          ) {
+            showPhaseMessage("Player 1 Wins!", 3000);
+          } else if (
+            player1.shipBoard.sunkenShips.length >
+            player2.shipBoard.sunkenShips.length
+          ) {
+            showPhaseMessage("Player 2 Wins!", 3000);
+          } else {
+            showPhaseMessage("Draw - It's a Tie!", 3000);
+          }
+          return;
+        }
+
+        // Switch turn to player 1
+        currentTurn = 1;
+        showPhaseMessage("Player 1's Turn", 2000);
+        disableBoard(player2AttackCells);
+        enableBoard(player1AttackCells);
+      }
+    });
+  });
+}
+
+// Helper functions to enable/disable boards
+function disableBoard(cells) {
+  cells.forEach((cell) => {
+    cell.style.pointerEvents = "none";
+    cell.style.opacity = "0.5";
+  });
+}
+
+function enableBoard(cells) {
+  cells.forEach((cell) => {
+    if (!cell.classList.contains("attacked")) {
+      cell.style.pointerEvents = "auto";
+      cell.style.opacity = "1";
+    }
   });
 }
 
@@ -230,7 +409,10 @@ function showPhaseMessage(message, duration = 2000) {
   const messageDiv = document.createElement("div");
   messageDiv.className = "phase-message";
 
-  const isGameOver = message === "You Won!" || message === "You Lost!";
+  const isGameOver =
+    message === "You Won!" ||
+    message === "You Lost!" ||
+    message === "Draw - All cells attacked!";
 
   if (isGameOver) {
     // Create container for game over screen

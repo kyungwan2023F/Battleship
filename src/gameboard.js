@@ -117,6 +117,10 @@ export class GameBoard {
       } else {
         return "Already Hit. Pick Another Coordinate.";
       }
+      return {
+        attackRow: startRow,
+        attackCol: startCol,
+      };
     } else {
       this.missedAttacks.push({ row: startRow, column: startCol });
       if (!this.board[startRow][startCol].getWasHit()) {
@@ -141,6 +145,17 @@ export class GameBoard {
 
   isAllShipSunk() {
     return this.sunkenShips.length >= 5;
+  }
+
+  isAllCellsAttacked() {
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        if (!this.board[i][j].getWasHit()) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
 

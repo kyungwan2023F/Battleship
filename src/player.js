@@ -27,6 +27,8 @@ export class Player {
         // Attack this cell
         const result = targetBoard.receiveAttack(row, col);
 
+        console.log("Hitting: ", row, col);
+
         return {
           row: row,
           col: col,

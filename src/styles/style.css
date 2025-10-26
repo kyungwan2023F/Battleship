@@ -1,9 +1,24 @@
 .app {
   display: flex;
+  justify-content: flex-start;
   position: relative;
   min-height: 600px;
   border: 2px solid red;
   background: rgba(0, 255, 0, 0.1);
+  gap: 2rem;
+  padding: 2rem;
+  padding-left: 20rem;
+}
+
+.player-area {
+  display: flex;
+  gap: 5rem;
+}
+
+.board-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .player-ship-board {
@@ -12,6 +27,21 @@
   display: grid;
   grid-template-columns: repeat(10, 40px);
   grid-template-rows: repeat(10, 40px);
+}
+
+.board-title {
+  height: 3rem;
+  padding: 0.5rem 1rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px 8px 8px 8px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .player-attack-board {
@@ -45,6 +75,42 @@
   cursor: not-allowed;
 }
 
+.cell.hit {
+  background-color: #ff4444 !important;
+  border-color: #cc0000;
+  cursor: not-allowed;
+  position: relative;
+  z-index: 10;
+}
+
+.cell.hit::after {
+  content: "✕";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.cell.miss {
+  background-color: #e0e0e0 !important;
+  border-color: #999;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.cell.miss::after {
+  content: "○";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 20px;
+}
+
 .ships-layer {
   padding: 1rem;
   position: absolute;
@@ -53,10 +119,12 @@
   grid-template-columns: inherit;
   grid-template-rows: inherit;
   pointer-events: none;
+  z-index: 1;
 }
 
 .ship {
   background-color: black;
+  z-index: 1;
 }
 
 .highlight {
@@ -77,8 +145,8 @@
 
 .ship-container {
   position: fixed;
-  right: 700px;
-  top: 2rem;
+  right: 20rem;
+  top: 13rem;
   display: flex;
   flex-direction: column;
   gap: 15px;
