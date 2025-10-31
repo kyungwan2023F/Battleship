@@ -23,36 +23,8 @@ export function displayMainMenu() {
   app.appendChild(menu);
 
   document.getElementById("play-btn").addEventListener("click", () => {
-    menu.classList.add("hidden");
-    showGameModeSelection();
-  });
-}
-
-function showGameModeSelection() {
-  const app = document.querySelector(".app");
-  app.innerHTML = "";
-  const playerOptionMenu = document.createElement("div");
-  const singlePlayerOption = document.createElement("button");
-  const multiPlayerOption = document.createElement("button");
-  playerOptionMenu.id = "player-option-menu";
-  singlePlayerOption.id = "single-player-button";
-  singlePlayerOption.textContent = "Single Player";
-
-  multiPlayerOption.id = "multi-player-button";
-  multiPlayerOption.textContent = "Multi Player";
-
-  playerOptionMenu.appendChild(singlePlayerOption);
-  playerOptionMenu.appendChild(multiPlayerOption);
-  app.appendChild(playerOptionMenu);
-
-  singlePlayerOption.addEventListener("click", () => {
     app.innerHTML = "";
     initializeSinglePlayerGame();
-  });
-
-  multiPlayerOption.addEventListener("click", () => {
-    app.innerHTML = "";
-    initializeMultiPlayerGame();
   });
 }
 
@@ -110,6 +82,7 @@ export function initializeSinglePlayerGame() {
   initializeShipDragging(player1ShipBoard, playArea, player1, handleShipPlaced);
 
   attachRightClickRotation();
+  attachMenuButton();
 }
 
 export function initializeMultiPlayerGame() {
@@ -525,4 +498,71 @@ function showPhaseMessage(message, duration = 2000) {
     messageDiv.style.animation = "fadeOut 0.3s ease-out";
     setTimeout(() => messageDiv.remove(), 300);
   }, duration);
+}
+
+export function attachMenuButton() {
+  const existingButton = document.querySelector(".menu-button");
+  if (existingButton) {
+    existingButton.remove();
+  }
+
+  const menuButton = document.createElement("button");
+  menuButton.className = "menu-button";
+  menuButton.innerHTML = "☰ Menu";
+
+  // Style the button
+  menuButton.style.cssText = `
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  `;
+
+  const app = document.querySelector(".app");
+
+  // Add hover effects
+  menuButton.addEventListener("mouseenter", () => {
+    menuButton.style.background =
+      "linear-gradient(135deg, #0b5ed7 0%, #084298 100%)";
+    menuButton.style.transform = "translateY(-2px)";
+    menuButton.style.boxShadow = "0 6px 20px rgba(13, 110, 253, 0.6)";
+  });
+
+  menuButton.addEventListener("mouseleave", () => {
+    menuButton.style.background =
+      "linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)";
+    menuButton.style.transform = "translateY(0)";
+    menuButton.style.boxShadow = "0 4px 15px rgba(13, 110, 253, 0.4)";
+  });
+
+  // Add click handler
+  menuButton.addEventListener("click", () => {
+    // Show confirmation dialog
+    const confirmed = confirm(
+      "Are you sure you want to return to the main menu? Your current game will be lost.",
+    );
+
+    if (confirmed) {
+      app.innerHTML = "";
+
+      displayMainMenu();
+    }
+  });
+
+  // Append to container
+  app.appendChild(menuButton);
+
+  return menuButton;
 }
