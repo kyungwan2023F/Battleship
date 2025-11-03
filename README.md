@@ -1,6 +1,6 @@
 # 🚢 Battleship Game
 
-A classic naval strategy game built with vanilla JavaScript, featuring single-player and multiplayer modes with an intuitive drag-and-drop ship placement interface.
+A classic naval strategy game built with vanilla JavaScript, featuring single-player mode with an intuitive drag-and-drop ship placement interface.
 
 ## 🎮 [Play Live Demo](https://kyungwan2023F.github.io/Battleship/)
 
