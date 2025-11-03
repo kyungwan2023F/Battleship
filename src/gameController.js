@@ -82,7 +82,7 @@ export function initializeSinglePlayerGame() {
   initializeShipDragging(player1ShipBoard, playArea, player1, handleShipPlaced);
 
   attachRightClickRotation();
-  attachMenuButton();
+  attachRetryButton();
 }
 
 export function initializeMultiPlayerGame() {
@@ -500,18 +500,18 @@ function showPhaseMessage(message, duration = 2000) {
   }, duration);
 }
 
-export function attachMenuButton() {
+export function attachRetryButton() {
   const existingButton = document.querySelector(".menu-button");
   if (existingButton) {
     existingButton.remove();
   }
 
-  const menuButton = document.createElement("button");
-  menuButton.className = "menu-button";
-  menuButton.innerHTML = "☰ Menu";
+  const retryButton = document.createElement("button");
+  retryButton.className = "retry-button";
+  retryButton.innerHTML = "Replay";
 
   // Style the button
-  menuButton.style.cssText = `
+  retryButton.style.cssText = `
     position: fixed;
     top: 2rem;
     left: 2rem;
@@ -533,36 +533,30 @@ export function attachMenuButton() {
   const app = document.querySelector(".app");
 
   // Add hover effects
-  menuButton.addEventListener("mouseenter", () => {
-    menuButton.style.background =
+  retryButton.addEventListener("mouseenter", () => {
+    retryButton.style.background =
       "linear-gradient(135deg, #0b5ed7 0%, #084298 100%)";
-    menuButton.style.transform = "translateY(-2px)";
-    menuButton.style.boxShadow = "0 6px 20px rgba(13, 110, 253, 0.6)";
+    retryButton.style.transform = "translateY(-2px)";
+    retryButton.style.boxShadow = "0 6px 20px rgba(13, 110, 253, 0.6)";
   });
 
-  menuButton.addEventListener("mouseleave", () => {
-    menuButton.style.background =
+  retryButton.addEventListener("mouseleave", () => {
+    retryButton.style.background =
       "linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%)";
-    menuButton.style.transform = "translateY(0)";
-    menuButton.style.boxShadow = "0 4px 15px rgba(13, 110, 253, 0.4)";
+    retryButton.style.transform = "translateY(0)";
+    retryButton.style.boxShadow = "0 4px 15px rgba(13, 110, 253, 0.4)";
   });
 
   // Add click handler
-  menuButton.addEventListener("click", () => {
-    // Show confirmation dialog
-    const confirmed = confirm(
-      "Are you sure you want to return to the main menu? Your current game will be lost.",
-    );
-
-    if (confirmed) {
-      app.innerHTML = "";
-
-      displayMainMenu();
-    }
+  retryButton.addEventListener("click", () => {
+    resetShipDraggingState();
+    const appContainer = document.querySelector(".app");
+    appContainer.innerHTML = "";
+    initializeSinglePlayerGame();
   });
 
   // Append to container
-  app.appendChild(menuButton);
+  app.appendChild(retryButton);
 
-  return menuButton;
+  return retryButton;
 }
