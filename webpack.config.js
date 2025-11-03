@@ -8,8 +8,9 @@ export default {
     filename: "main.js",
     path: path.resolve("dist"),
     clean: true,
+    publicPath: "/Battleship/",
   },
-  mode: "development",
+  mode: "production",
   devServer: {
     static: "./dist",
   },
@@ -31,6 +32,7 @@ export default {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/index.html",
+      title: "Battleship Game",
     }),
   ],
 };
